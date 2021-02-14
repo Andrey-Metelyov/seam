@@ -10,7 +10,7 @@ import edu.princeton.cs.algs4.StdOut;
 public class SeamCarver {
     public static final int BORDER_PIXEL_ENERGY = 1000;
     private Picture picture;
-    private double energy[][];
+    private double[][] energy;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
@@ -35,19 +35,19 @@ public class SeamCarver {
                 int xm1 = pixels[y][x - 1];
                 int xm1r = (xm1 >> 16) & 0xFF;
                 int xm1g = (xm1 >>  8) & 0xFF;
-                int xm1b = (xm1 >>  0) & 0xFF;
-                int xp1 = picture.getRGB(x + 1, y);
+                int xm1b = (xm1) & 0xFF;
+                int xp1 = pixels[y][x + 1];
                 int xp1r = (xp1 >> 16) & 0xFF;
                 int xp1g = (xp1 >>  8) & 0xFF;
-                int xp1b = (xp1 >>  0) & 0xFF;
-                int ym1 = picture.getRGB(x , y - 1);
+                int xp1b = (xp1) & 0xFF;
+                int ym1 = pixels[y - 1][x];
                 int ym1r = (ym1 >> 16) & 0xFF;
                 int ym1g = (ym1 >>  8) & 0xFF;
-                int ym1b = (ym1 >>  0) & 0xFF;
-                int yp1 = picture.getRGB(x, y + 1);
+                int ym1b = (ym1) & 0xFF;
+                int yp1 = pixels[y + 1][x];
                 int yp1r = (yp1 >> 16) & 0xFF;
                 int yp1g = (yp1 >>  8) & 0xFF;
-                int yp1b = (yp1 >>  0) & 0xFF;
+                int yp1b = (yp1) & 0xFF;
                 energy[y][x] = (xm1r - xp1r) * (xm1r - xp1r)
                         + (xm1g - xp1g) * (xm1g - xp1g)
                         + (xm1b - xp1b) * (xm1b - xp1b)
