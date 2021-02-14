@@ -7,20 +7,60 @@
 import edu.princeton.cs.algs4.Picture;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.awt.Color;
-
 public class SeamCarver {
     public static final int BORDER_PIXEL_ENERGY = 1000;
     private Picture picture;
+    private double energy[][];
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
-        this.picture = picture;
+        this.picture = new Picture(picture);
+        computeEnergy();
+    }
+
+    private void computeEnergy() {
+        energy = new double[height()][width()];
+        int[][] pixels = new int[height()][width()];
+        for (int y = 0; y < height(); y++) {
+            for (int x = 0; x < width(); x++) {
+                pixels[y][x] = picture.getRGB(x, y);
+            }
+        }
+        for (int y = 0; y < height(); y++) {
+            for (int x = 0; x < width(); x++) {
+                if (x == 0 || x == width() - 1 || y == 0 || y == height() - 1) {
+                    energy[y][x] = BORDER_PIXEL_ENERGY;
+                    continue;
+                }
+                int xm1 = pixels[y][x - 1];
+                int xm1r = (xm1 >> 16) & 0xFF;
+                int xm1g = (xm1 >>  8) & 0xFF;
+                int xm1b = (xm1 >>  0) & 0xFF;
+                int xp1 = picture.getRGB(x + 1, y);
+                int xp1r = (xp1 >> 16) & 0xFF;
+                int xp1g = (xp1 >>  8) & 0xFF;
+                int xp1b = (xp1 >>  0) & 0xFF;
+                int ym1 = picture.getRGB(x , y - 1);
+                int ym1r = (ym1 >> 16) & 0xFF;
+                int ym1g = (ym1 >>  8) & 0xFF;
+                int ym1b = (ym1 >>  0) & 0xFF;
+                int yp1 = picture.getRGB(x, y + 1);
+                int yp1r = (yp1 >> 16) & 0xFF;
+                int yp1g = (yp1 >>  8) & 0xFF;
+                int yp1b = (yp1 >>  0) & 0xFF;
+                energy[y][x] = (xm1r - xp1r) * (xm1r - xp1r)
+                        + (xm1g - xp1g) * (xm1g - xp1g)
+                        + (xm1b - xp1b) * (xm1b - xp1b)
+                        + (ym1r - yp1r) * (ym1r - yp1r)
+                        + (ym1g - yp1g) * (ym1g - yp1g)
+                        + (ym1b - yp1b) * (ym1b - yp1b);
+            }
+        }
     }
 
     // current picture
     public Picture picture() {
-        return picture;
+        return new Picture(picture);
     }
 
     // width of current picture
@@ -35,22 +75,7 @@ public class SeamCarver {
 
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
-        int width = width();
-        int height = height();
-        if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
-            return BORDER_PIXEL_ENERGY;
-        }
-        Color xm1 = new Color(picture.getRGB(x - 1, y));
-        Color xp1 = new Color(picture.getRGB(x + 1, y));
-        Color ym1 = new Color(picture.getRGB(x, y - 1));
-        Color yp1 = new Color(picture.getRGB(x, y + 1));
-        int dX = (xm1.getRed() - xp1.getRed()) * (xm1.getRed() - xp1.getRed())
-                + (xm1.getGreen() - xp1.getGreen()) * (xm1.getGreen() - xp1.getGreen())
-                + (xm1.getBlue() - xp1.getBlue()) * (xm1.getBlue() - xp1.getBlue());
-        int dY = (ym1.getRed() - yp1.getRed()) * (ym1.getRed() - yp1.getRed())
-                + (ym1.getGreen() - yp1.getGreen()) * (ym1.getGreen() - yp1.getGreen())
-                + (ym1.getBlue() - yp1.getBlue()) * (ym1.getBlue() - yp1.getBlue());
-        return dX + dY;
+        return energy[y][x];
     }
 
     // sequence of indices for horizontal seam
@@ -75,8 +100,9 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        Picture pic = new Picture("10x10.png");
-        // Picture pic = new Picture("3x4.png");
+        // Picture pic = new Picture("1x8.png");
+        // Picture pic = new Picture("8x1.png");
+        Picture pic = new Picture("3x4.png");
         SeamCarver seamCarver = new SeamCarver(pic);
         StdOut.println(pic.width() + "x" + pic.height());
         for (int y = 0; y < seamCarver.height(); y++) {
